@@ -11,7 +11,9 @@ FORMAT = ihex
 #     it will preserve the spelling of the filenames, and gcc itself does
 #     care about how the name is spelled on its command-line.
 ifneq ($(CONFIG_HARDWARE_VARIANT),5)
+ifneq ($(CONFIG_HARDWARE_VARIANT),6)
   ASRC = avr/bitbanging.S
+endif
 endif
 
 SRC += avr/system.c
@@ -28,6 +30,11 @@ endif
 
 # tapecart-tapuino
 ifeq ($(CONFIG_HARDWARE_VARIANT),5)
+  SRC += avr/arch-bitbanging.c avr/spi.c avr/uart.c
+endif
+
+# tapecart-tapuino-simple
+ifeq ($(CONFIG_HARDWARE_VARIANT),6)
   SRC += avr/arch-bitbanging.c avr/spi.c avr/uart.c
 endif
 
@@ -89,8 +96,13 @@ ifeq ($(CONFIG_HARDWARE_VARIANT),5)
   # com1 = serial port. Use lpt1 to connect to parallel port.
   AVRDUDE_PORT = /dev/ttyUSB0   # programmer connected to serial device
 else
+ifeq ($(CONFIG_HARDWARE_VARIANT),6)
+  AVRDUDE_PROGRAMMER = arduino
+  AVRDUDE_PORT = /dev/ttyUSB0
+else
   AVRDUDE_PROGRAMMER = stk200
   AVRDUDE_PORT = lpt1
+endif
 endif
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex

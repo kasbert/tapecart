@@ -108,7 +108,7 @@ static int16_t c64_get_byte(void) {
 
   v = 0;
   for (i = 0; i < 8; i++) {
-#if CONFIG_HARDWARE_VARIANT != 5  // WRITE_PORT == SENSE_PORT
+#if CONFIG_HARDWARE_VARIANT != 5 && CONFIG_HARDWARE_VARIANT != 6 // WRITE_PORT == SENSE_PORT
     do {
       tmp = get_port();
 

@@ -71,6 +71,8 @@ else ifeq ($(CONFIG_HARDWARE_VARIANT),4)
   SRC += extmem_w25q.c
 else ifeq ($(CONFIG_HARDWARE_VARIANT),5)
   SRC += extmem_sd.c ff.c ffunicode.c mmc_spi.c
+else ifeq ($(CONFIG_HARDWARE_VARIANT),6)
+  SRC += extmem_sd.c ff.c ffunicode.c mmc_spi.c
 else
 .PHONY: nomem
 nomem:

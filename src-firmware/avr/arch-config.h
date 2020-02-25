@@ -39,7 +39,7 @@
 
 /* I/O port definitions */
 /* note: Write and Sense must be on the same port */
-#if CONFIG_HARDWARE_VARIANT != 5
+#if CONFIG_HARDWARE_VARIANT != 5 && CONFIG_HARDWARE_VARIANT != 6
 
 #define SENSE_PORT  PORTA
 #define SENSE_DDR   DDRA
@@ -128,6 +128,39 @@
 
 #define HAVE_UART
 
+/* tapecart-tapuino-simple */
+#elif CONFIG_HARDWARE_VARIANT == 6
+
+#define SENSE_PORT  PORTD
+#define SENSE_DDR   DDRD
+#define SENSE_PIN   PIND
+#define SENSE_BIT   2
+
+#define READ_PORT   PORTD
+#define READ_DDR    DDRD
+#define READ_PIN    PIND
+#define READ_BIT    4
+
+#define WRITE_PORT  PORTD
+#define WRITE_DDR   DDRD
+#define WRITE_PIN   PIND
+#define WRITE_BIT   3
+
+#define MOTOR_PORT  PORTD
+#define MOTOR_DDR   DDRD
+#define MOTOR_PIN   PIND
+#define MOTOR_BIT   5
+#define MOTOR_VECT  PCINT2_vect
+
+/* NOTE: Normally not connected on Tapuino */
+#define LED_PORT    PORTD
+#define LED_DDR     DDRD
+#define LED_BIT     6
+
+#undef MOTOR_INVERTED
+
+#define HAVE_UART
+
 #else
 #  error "Unknown hardware variant selected"
 #endif
@@ -176,7 +209,11 @@ static inline void ioport_init(void) {
   WRITE_DDR  &= ~_BV(WRITE_BIT);
   READ_PORT  &= ~_BV(READ_BIT);
   READ_DDR   |=  _BV(READ_BIT);
+#if CONFIG_HARDWARE_VARIANT != 6 // MOTOR_INVERTED
   MOTOR_PORT |=  _BV(MOTOR_BIT);
+#else
+  MOTOR_PORT &=  _BV(MOTOR_BIT);
+#endif
   MOTOR_DDR  &= ~_BV(MOTOR_BIT);
   SENSE_PORT &= ~_BV(SENSE_BIT);
   SENSE_DDR  |=  _BV(SENSE_BIT);
@@ -189,7 +226,7 @@ static inline void ioport_init(void) {
 #endif
 
   /* motor PCINT */
-#if CONFIG_HARDWARE_VARIANT != 5
+#if CONFIG_HARDWARE_VARIANT != 5 && CONFIG_HARDWARE_VARIANT != 6
 
   PCMSK0  = _BV(MOTOR_BIT);
   GIMSK  |= _BV(PCIE0);

@@ -40,7 +40,7 @@
 #define delay_ms(x) _delay_ms(x)
 #define delay_us(x) _delay_us(x)
 
-#if CONFIG_HARDWARE_VARIANT != 5
+#if CONFIG_HARDWARE_VARIANT != 5 && CONFIG_HARDWARE_VARIANT != 6
 #define PULSETIMER_HANDLER ISR(TIM0_COMPA_vect)
 #else
 #define PULSETIMER_HANDLER ISR(TIMER0_COMPA_vect)
@@ -65,7 +65,7 @@ static inline void pulsetimer_init(void) {
 }
 
 static inline void pulsetimer_set_pulselen(uint8_t len) {
-#if CONFIG_HARDWARE_VARIANT != 5
+#if CONFIG_HARDWARE_VARIANT != 5 && CONFIG_HARDWARE_VARIANT != 6
   OCR0A = len;
 #else
   /* adjust for higher clock frequency */
