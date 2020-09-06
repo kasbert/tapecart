@@ -33,7 +33,7 @@ static void mainLoop(void);
 static void updateScreen(void);
 static void updateMenu(void);
 
-static void execute(char *prg);
+static void execute(DirElement *elem);
 static void changeDir(char *path);
 static void clrDir(void);
 static void showDir(void);
@@ -185,7 +185,7 @@ static void mainLoop(void)
                         }
                         else if (current->type != FILE_UNKNOWN)
                         {
-                            execute(current->name);
+                            execute(current);
                         }
                     }
                     break;
@@ -296,14 +296,15 @@ static void changeDir(char *path)
     showDir();
 }
 
-static void execute(char *prg)
+static void execute(DirElement *elem)
 {
     uint8_t i;
 
     tapecart_sendbyte(CMD_SD_SELECT_FILE);
+    tapecart_sendbyte(elem->type);
     for (i = 0; i < FILENAME_LENGTH; ++i)
     {
-        tapecart_sendbyte(prg[i]);
+        tapecart_sendbyte(elem->name[i]);
     }
 
     // install loader

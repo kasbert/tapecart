@@ -69,4 +69,12 @@ typedef enum {
   CMD_RAMEXEC = 0xf0,
 } command_t;
 
+#define FILENAME_LENGTH 20
+typedef struct direlement {
+    char name[FILENAME_LENGTH+1];
+    uint32_t size;
+    uint8_t type;
+} DirElement;
+
+
 #endif

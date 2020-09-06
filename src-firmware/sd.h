@@ -57,6 +57,8 @@ typedef struct {
 
 uint8_t get_file_type(char *filename);
 bool    select_file(char *filename);
+void    add_extension(char *filename, char *extension);
+void    strip_extension(char *filename);
 
 static inline uint8_t eeprom_read_byte(void *ptr) {
   uint8_t *u8ptr = ptr;

@@ -34,6 +34,7 @@
 #include "config.h"
 #include "extmem.h"
 #include "cmdmode.h"
+#include "commands.h"
 
 #define TCRT_LOADINFO 18
 #define TCRT_FLASH_CONTENT 216
@@ -77,11 +78,14 @@ static bool compare_extension(char *ext1, const char *ext2) {
   return true;
 }
 
+  
+
+
 uint8_t get_file_type(char *filename) {
   uint8_t length = 0;
-  uint8_t extension = 15;
+  uint8_t extension = FILENAME_LENGTH - 1;
 
-  for (; length < 16; length++) {
+  for (; length < FILENAME_LENGTH; length++) {
     uint8_t chr = filename[length];
     if (chr) {
       if (chr == '.') {
@@ -113,6 +117,46 @@ uint8_t get_file_type(char *filename) {
 
   return FILE_UNKNOWN;
 }
+
+void add_extension(char *filename, char *extension) {
+  uint8_t length = 0;
+  for (; length < FILENAME_LENGTH; length++) {
+    if (!filename[length]) {
+      break;
+    }
+  }
+  if (length < FILENAME_LENGTH) {
+    filename[length] = '.';
+    length++;
+  }
+  for (uint8_t i=0; length < FILENAME_LENGTH; i++, length++) {
+    filename[length] = extension[i];
+    if (!extension[i]) {
+      break;
+    }
+  }
+  filename[FILENAME_LENGTH] = 0;
+}
+
+void strip_extension(char *filename) {
+  uint8_t length = 0;
+  uint8_t extension = FILENAME_LENGTH;
+
+  for (; length < FILENAME_LENGTH; length++) {
+    uint8_t chr = filename[length];
+    if (chr) {
+      if (chr == '.') {
+        extension = length;
+      }
+    } else {
+      break;
+    }
+  }
+  if (extension < length) {
+    filename[extension] = 0;
+  }
+}
+
 
 static FRESULT file_seek(uint24 address) {
   FRESULT fr = f_lseek(&file, address);

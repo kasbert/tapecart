@@ -42,12 +42,6 @@ typedef enum {
 
 #define MAX_DIR_ELEMENTS 1000
 
-typedef struct direlement {
-    char name[FILENAME_LENGTH+1];
-    uint32_t size;
-    uint8_t type;
-} DirElement;
-
 typedef struct {
   char name[FILENAME_LENGTH+1];
   DirElement elements[MAX_DIR_ELEMENTS];

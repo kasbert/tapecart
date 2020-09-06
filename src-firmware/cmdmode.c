@@ -693,7 +693,7 @@ static void set_dirparams(void) {
   get_u8(&dir_data_len);
 }
 
-static uint8_t dir_namebuf[16+1];
+static uint8_t dir_namebuf[FILENAME_LENGTH+1+3+1];// .ext + \0
 
 static void do_dir_lookup(void) {
   /* parameters:
@@ -772,11 +772,11 @@ static void sd_open_dir(void) {
    */
 
   /* read name from C64 */
-  for (uint8_t i = 0; i < 16; i++) {
+  for (uint8_t i = 0; i < FILENAME_LENGTH; i++) {
     if (get_u8(dir_namebuf + i))
       return;
   }
-  dir_namebuf[16] = 0;
+  dir_namebuf[FILENAME_LENGTH] = 0;
 
   if (dir_open) {
     f_closedir(&dir);
@@ -803,8 +803,8 @@ static void sd_open_dir(void) {
     if (len == 0) {
       new_dir[0] = '.';
       new_dir[1] = 0;
-    } else if (len > 16) {
-      index = len - 16;
+    } else if (len > FILENAME_LENGTH) {
+      index = len - FILENAME_LENGTH;
       new_dir[index] = '.';
       new_dir[index+1] = '.';
     } else if (len == 1 && new_dir[0] == '/') {
@@ -812,7 +812,7 @@ static void sd_open_dir(void) {
     }
   }
 
-  for (uint8_t i = index; i < index + 16; i++) {
+  for (uint8_t i = index; i < index + FILENAME_LENGTH; i++) {
     if (send_byte(new_dir[i]))
       return;
   }
@@ -824,7 +824,7 @@ static void sd_read_dir(void) {
    * reply:
    *   1 byte file type (0: end of dir, see file_t)
    *   3 byte file size
-   *  16 byte filename (null-terminated if shorter than 16 bytes)
+   *  20 byte filename (null-terminated if shorter than 20 bytes)
    */
 
   uint16_t max_files;
@@ -868,7 +868,11 @@ static void sd_read_dir(void) {
     send_byte_fast(*size_ptr++);
     send_byte_fast(*size_ptr);
 
-    for (uint8_t l = 0; l < 16; l++) {
+    if (file_type == FILE_PRG) {
+      strip_extension(info.fname);
+    }
+
+    for (uint8_t l = 0; l < FILENAME_LENGTH; l++) {
       send_byte_fast(info.fname[l]);
     }
 
@@ -886,13 +890,19 @@ static void sd_select_file(void) {
    * no reply
    */
 
+  uint8_t file_type;
+  if (get_u8(&file_type))
+    return;
+
   /* read name from C64 */
-  for (uint8_t i = 0; i < 16; i++) {
-    if (get_u8(dir_namebuf + i))
+  for (uint8_t i = 0; i < FILENAME_LENGTH; i++) {
+    if (get_u8(((uint8_t*)dir_namebuf) + i))
       return;
   }
-
-  dir_namebuf[16] = 0;
+  dir_namebuf[FILENAME_LENGTH] = 0;
+  if (file_type == FILE_PRG) {
+    add_extension((char*)dir_namebuf, "PRG");
+  }
   select_file((char *)dir_namebuf);
 }
 #endif
