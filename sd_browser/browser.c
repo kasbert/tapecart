@@ -296,6 +296,36 @@ static void changeDir(char *path)
     showDir();
 }
 
+static void reset_and_load(void)
+{
+    clrscr();
+    __asm__ ("JSR $FDA3"); // prepare IRQ
+    __asm__ ("LDA #$00\n"
+        "TAY\n"
+      "coldstart2:\n"
+        "STA $0002,Y\n"
+        "STA $0200,Y\n"
+        "STA $0300,Y\n"
+        "INY\n"
+        "BNE coldstart2\n");
+    __asm__ ("LDX #$3C\n"
+        "LDY #$03\n"
+        "STX $B2\n"
+        "STY $B3\n"
+        "LDX #$00\n"
+        "LDY #$a0\n"
+        "STX $C1\n"
+        "STY $C2\n"
+        "JSR $FD8C\n");
+    // press SHIFT RUN/STOP
+    __asm__ ("LDA #$83\n"
+        "STA $0277\n"
+        "LDA #$01\n"
+        "STA $C6\n");
+    // continue normal boot
+    __asm__ ("jmp $fcf8");
+}
+
 static void execute(DirElement *elem)
 {
     uint8_t i;
@@ -307,6 +337,10 @@ static void execute(DirElement *elem)
         tapecart_sendbyte(elem->name[i]);
     }
 
+    if (elem->type == FILE_TAP)
+    {
+        reset_and_load();
+    }
     // install loader
     tapecart_read_loader((uint8_t *)0x0351);
 
@@ -397,6 +431,10 @@ static void printNameSize(DirElement *element)
     else
     {
         uint32_t size = element->size;
+        if (element->type == FILE_TAP)
+        {
+            textcolor(COLOR_GREEN);
+        }
         if (size >= 1024)
         {
             size >>= 10;

@@ -128,6 +128,8 @@
 
 #define HAVE_UART
 
+#define TAP_SUPPORT
+
 /* tapecart-tapuino-simple */
 #elif CONFIG_HARDWARE_VARIANT == 6
 
@@ -160,6 +162,8 @@
 #undef MOTOR_INVERTED
 
 #define HAVE_UART
+#define TAP_SUPPORT
+//#define UART_LOG
 
 #else
 #  error "Unknown hardware variant selected"

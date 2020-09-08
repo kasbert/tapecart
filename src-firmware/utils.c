@@ -34,6 +34,7 @@
 #include "bitbanging.h"
 #include "timer.h"
 #include "utils.h"
+#include "uart.h"
 
 #define TIME_BASE 200 // milliseconds
 
@@ -54,3 +55,20 @@ void blink_value(uint16_t value, uint8_t bits) {
     delay_ms(TIME_BASE);
   }
 }
+
+#ifdef UART_LOG
+void LOG(const char *p) {
+  uart_puts(p);
+}
+
+void LOGNL(const char *p) {
+  uart_puts(p);
+  uart_putcrlf();
+  uart_flush();
+}
+
+void LOGFLUSH(void) {
+  uart_flush();
+}
+#endif
+

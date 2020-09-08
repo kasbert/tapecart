@@ -41,6 +41,7 @@
 #include "timer.h"
 #include "uart.h"
 #include "utils.h"
+#include "tap.h"
 #include "cmdmode.h"
 
 
@@ -868,7 +869,7 @@ static void sd_read_dir(void) {
     send_byte_fast(*size_ptr++);
     send_byte_fast(*size_ptr);
 
-    if (file_type == FILE_PRG) {
+    if (file_type == FILE_PRG || file_type == FILE_TAP) {
       strip_extension(info.fname);
     }
 
@@ -900,6 +901,19 @@ static void sd_select_file(void) {
       return;
   }
   dir_namebuf[FILENAME_LENGTH] = 0;
+
+#ifdef TAP_SUPPORT
+  if (file_type == FILE_TAP) {
+    add_extension((char*)dir_namebuf, "TAP");
+    pulsetimer_enable(false);
+    TIMSK0 = 0; // FIXME move to pulsetimer_enable
+    tap_play_file((char *)dir_namebuf);
+    pulsetimer_init();
+    pulsetimer_enable(true);
+    return; // FIXME RESET THE WHOLE THING
+  }
+#endif
+
   if (file_type == FILE_PRG) {
     add_extension((char*)dir_namebuf, "PRG");
   }

@@ -105,10 +105,12 @@ uint8_t get_file_type(char *filename) {
     if (compare_extension(filename, "TCR")) {
       return FILE_TCRT;
     }
-#if 0 // Not supported
+#ifdef TAP_SUPPORT
     if (compare_extension(filename, "TAP")) {
       return FILE_TAP;
     }
+#endif
+#if 0 // Not supported
     if (compare_extension(filename, "D64")) {
       return FILE_D64;
     }

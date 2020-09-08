@@ -36,5 +36,15 @@
 #include <stdint.h>
 
 void blink_value(uint16_t value, uint8_t bits);
+#ifdef UART_LOG
+void LOG(const char *p);
+void LOGNL(const char *p);
+void LOGFLUSH(void);
+#else
+#define LOG(x)
+#define LOGNL(x)
+#define LOGFLUSH(x)
+#endif
+
 
 #endif
