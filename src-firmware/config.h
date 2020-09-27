@@ -67,12 +67,14 @@
 
 #  define HAVE_SD
 #  define MEMTYPE_STRING "sdcard"
+#  define HAVE_INTERNAL_BROWSER
 
 /* SD-SPI tapecart-tapuino-simple */
 #elif CONFIG_HARDWARE_VARIANT == 6
 
 #  define HAVE_SD
 #  define MEMTYPE_STRING "sdcard"
+#  define HAVE_INTERNAL_BROWSER
 
 #else
 #  error "Unknown hardware variant selected"

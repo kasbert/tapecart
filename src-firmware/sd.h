@@ -46,6 +46,7 @@ typedef enum {
   FILE_TAP,
   FILE_D64,
 
+  FILE_INTERNAL_BROWSER,
   FILE_UNKNOWN = 0xFF
 } file_t;
 
@@ -59,6 +60,7 @@ uint8_t get_file_type(char *filename);
 bool    select_file(char *filename);
 void    add_extension(char *filename, char *extension);
 void    strip_extension(char *filename);
+void    select_internal_browser(void);
 
 static inline uint8_t eeprom_read_byte(void *ptr) {
   uint8_t *u8ptr = ptr;

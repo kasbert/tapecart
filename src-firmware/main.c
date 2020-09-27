@@ -333,6 +333,7 @@ int main(void) {
 #endif
   pulsetimer_init();
   enable_interrupts();
+  LOGNL("Starting TAPECART");
 
 #if defined(HAVE_UART) && defined(ALLOW_RAMEXEC)
   /* check if an external flash tool is connected */
@@ -347,6 +348,8 @@ int main(void) {
 #endif
 
   while (1) {
+    LOGNL("In loop");
+    LOGNL(get_motor() ? "Motor ON" : "Motor OFF");
     old_mode  = mode;
     mode      = MODE_STREAM;
     shift_reg = 0;
@@ -354,9 +357,14 @@ int main(void) {
 #ifdef HAVE_SD
     if (old_mode == MODE_STREAM &&
         !select_file("/browser.prg") && !select_file("/default.tcrt")) {
+#ifdef HAVE_INTERNAL_BROWSER
+      select_internal_browser();
+#else
       set_sense(true);
-      delay_ms(500);
+       delay_ms(500);
+      LOGNL("ERROR: Cannot load browser");
       continue;
+#endif
     }
 #endif
 
@@ -366,15 +374,17 @@ int main(void) {
       // allow fast transition from command to loader mode
       delay_ms(100);
     } else {
-      /* transmit header block */
+      LOGNL("Transmit header block");
+      LOGNL(get_motor() ? "Motor ON" : "Motor OFF");
       cbm_sync(1500); // note: 500 appears to be less reliable
       cbm_datablock(header_datafunc);
 
-      /* transmit the autostart vector */
+      LOGNL("Transmit the autostart vector");
+      LOGNL(get_motor() ? "Motor ON" : "Motor OFF");
       cbm_sync(1500); // note: 500 does not work
       cbm_datablock(vector_datafunc);
 
-      /* wait until pulse buffer is empty or motor stopped */
+      LOGNL("Wait until pulse buffer is empty or motor stopped");
       while (get_motor() && (tapbuf_writeidx != tapbuf_readidx)) ;
 
       /* fill pulse buffer with syncs */
@@ -397,12 +407,14 @@ int main(void) {
     switch (mode) {
     case MODE_LOADER:
       // delay slightly to ensure the C64 has turned the motor signal off
+      LOGNL("Mode loader");
       delay_ms(100);
       loader_handler();
       delay_ms(200);
       break;
 
     case MODE_C64COMMAND:
+      LOGNL("Mode command");
       delay_ms(1); // ensure that the motor signal can be turned off
       c64command_handler();
       break;

@@ -31,6 +31,7 @@
 */
 
 #include <string.h>
+#include <avr/pgmspace.h> 
 #include "config.h"
 #include "extmem.h"
 #include "cmdmode.h"
@@ -50,6 +51,11 @@ static const uint8_t basic_starter[] = {
   0x4c, 0xae, 0xa7, // jmp $a7ae    ; RUN
   0x00              // $0800 must be zero
 };
+
+#ifdef HAVE_INTERNAL_BROWSER
+PROGMEM const
+#include "../sd_browser/browser_prg.h"
+#endif
 
 static uint8_t starter_index;
 
@@ -291,6 +297,33 @@ bool select_file(char *filename) {
   return fr == FR_OK;
 }
 
+#ifdef HAVE_INTERNAL_BROWSER
+static int browser_i = 0;
+void select_internal_browser(void) {
+
+  browser_i = 0;
+  uint16_t load_addr = pgm_read_byte( browser_prg+ browser_i++) + (pgm_read_byte( browser_prg + browser_i++) << 8);
+  FSIZE_t size = sizeof(browser_prg);
+
+  if (load_addr == 0x0801) {
+    // add stub to auto start the PRG
+    size += sizeof(basic_starter) - 2;
+    mcu_eeprom.calladdr = 0x801 - (sizeof(basic_starter) - 2);
+    use_starter = true;
+  } else {
+    mcu_eeprom.calladdr = load_addr;
+    use_starter = false;
+  }
+
+  mcu_eeprom.dataofs = 0;
+  mcu_eeprom.datalen = size;
+
+  memcpy(mcu_eeprom.filename, "TAPECART BROWSER ", 16);
+  FLASH_MEMCPY(mcu_eeprom.loadercode, default_loader, sizeof(default_loader));
+  file_type = FILE_INTERNAL_BROWSER;
+}
+#endif
+
 void extmem_read_start(uint24 address) {
   switch (file_type) {
     case FILE_PRG:
@@ -312,6 +345,22 @@ void extmem_read_start(uint24 address) {
       file_seek(address + TCRT_FLASH_CONTENT);
       break;
 
+#ifdef HAVE_INTERNAL_BROWSER
+    case FILE_INTERNAL_BROWSER:
+      if (use_starter) {
+        if (address >= sizeof(basic_starter)) {
+          starter_index = sizeof(basic_starter);
+          browser_i = (address - sizeof(basic_starter)) + 2;
+        } else {
+          starter_index = address;
+          browser_i = 2;
+        }
+      } else {
+        starter_index = sizeof(basic_starter);
+        browser_i = address;
+      }
+      break;
+#endif
     default:
       break;
   }
@@ -345,6 +394,16 @@ uint8_t extmem_read_byte(bool last_byte) {
     case FILE_TCRT:
       result = read_byte_from_file();
       break;
+
+#ifdef HAVE_INTERNAL_BROWSER
+    case FILE_INTERNAL_BROWSER:
+      if (starter_index < sizeof(basic_starter)) {
+        result = basic_starter[starter_index++];
+      } else {
+        result = pgm_read_byte( browser_prg + browser_i++);
+      }
+      break;
+#endif
 
     default:
       result = 0xff;
