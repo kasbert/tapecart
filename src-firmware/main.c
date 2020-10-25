@@ -71,10 +71,11 @@ static volatile uint16_t  shift_reg;
 static volatile tapmode_t mode = MODE_STREAM;
 static          tapmode_t old_mode = MODE_STREAM;
 
+#if defined(HAVE_UART) && defined(ALLOW_RAMEXEC)
 /* external flash tool detection */
 static const char uart_trigger_string[] = "UARTPROG";
 extern char __ramexec_start__;
-
+#endif
 
 /*** Interrupt handlers ***/
 
