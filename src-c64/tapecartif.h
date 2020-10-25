@@ -37,7 +37,7 @@
 
 #include "../src-firmware/commands.h"
 
-#define FILENAME_LENGTH 16
+#define FILENAME_LENGTH 20
 #define LOADER_LENGTH   171
 
 bool     tapecart_cmdmode(void);
